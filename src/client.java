@@ -95,42 +95,44 @@ public class client
 
     static void processTransmissions(BufferedReader serverInputStream, PrintWriter serverOutputStream, Scanner userInput, Socket serverSocket)
     {
-        String fromServer;
-        String toServer;
-
-        // Thread thread = new Thread() 
-        //     {
-        //         public void run()
-        //         {
-        //         }
-        //     };
-
-        //     thread.start();
-        try
+        Thread serverThread = new Thread() 
         {
-            while ((fromServer = serverInputStream.readLine()) != null) 
+            public void run()
             {
-                //trim ending control character. 
-                System.out.println(fromServer.substring(0, fromServer.length()-1));
-
-                //if server message ends with '+', skip user input and grab the next message.
-                //This is for multi line server messages.
-                if (fromServer.charAt(fromServer.length()-1) == '+') { continue; }
-
-                //wait for client user input.
-                toServer = userInput.nextLine();
+                String fromServer;
                 
-                //Send message to server.
-                if (toServer.equals("EXIT")) exit(userInput, serverSocket);
-                else if (toServer != null) serverOutputStream.println(toServer);
-                
+                try 
+                {
+                    while ((fromServer = serverInputStream.readLine()) != null) 
+                    {
+                        //trim ending control character. 
+                        System.out.println(fromServer.substring(0, fromServer.length()-1));
+                    }
+                } catch (IOException e) 
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
-        }
-        catch (Exception e)
+        };
+
+        Thread clientThread = new Thread() 
         {
-            System.out.println(e.toString());
-            System.exit(0);
-        }
+            public void run()
+            {
+                String toServer;
+
+                while ((toServer = userInput.nextLine()) != null) 
+                {
+                    //Send message to server.
+                    if (toServer.equals("EXIT")) exit(userInput, serverSocket);
+                    else if (toServer != null) serverOutputStream.println(toServer);
+                }
+            }
+        };
+
+        clientThread.start();
+        serverThread.start();
     }
 
     static void exit(Scanner userInput, Socket serverSocket)
