@@ -98,17 +98,32 @@ public class client
         String fromServer;
         String toServer;
 
+        // Thread thread = new Thread() 
+        //     {
+        //         public void run()
+        //         {
+        //         }
+        //     };
+
+        //     thread.start();
         try
         {
             while ((fromServer = serverInputStream.readLine()) != null) 
             {
-                if (fromServer.equals("EXIT")) exit(userInput, serverSocket);
+                //trim ending control character. 
+                System.out.println(fromServer.substring(0, fromServer.length()-1));
 
-                System.out.println("Server: " + fromServer);
+                //if server message ends with '+', skip user input and grab the next message.
+                //This is for multi line server messages.
+                if (fromServer.charAt(fromServer.length()-1) == '+') { continue; }
+
+                //wait for client user input.
                 toServer = userInput.nextLine();
-
-                if (toServer != null) 
-                    serverOutputStream.println(toServer);
+                
+                //Send message to server.
+                if (toServer.equals("EXIT")) exit(userInput, serverSocket);
+                else if (toServer != null) serverOutputStream.println(toServer);
+                
             }
         }
         catch (Exception e)
